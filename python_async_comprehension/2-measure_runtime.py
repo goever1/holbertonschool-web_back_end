@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """Python async comprehension"""
-from typing import List
+import asyncio
+import time
 
-async_generator = __import__('0-async_generator').async_generator
+async_comprehension = __import__('1-async_comprehension').async_comprehension
 
 
-async def async_comprehension() -> List[float]:
-    """it returns an async comprehension list"""
-    return [i async for i in async_generator()]
+async def measure_runtime() -> float:
+    """Function to coutne"""
+    start = time.perf_counter()
+    await asyncio.gather(async_comprehension(), async_comprehension(),
+                         async_comprehension(), async_comprehension())
+    end = time.pref_counter()
+    return end - start
