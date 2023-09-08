@@ -1,26 +1,47 @@
 #!/usr/bin/env python3
 """
-a Python script that provides some stats about nginx logs stored in MongoDB
+Script that provides stats about Nginx logs stored in Mongo
 """
-from pymongo import MongoClient
+
+import pymongo
+
+
+def count_documents(collection):
+    """Count the number of documents in a collection"""
+    return collection.count_documents({})
+
+
+def count_method_documents(collection, method):
+    """Count the number of document in a collection with a given method"""
+    return collection.count_documents({"method": method})
+
+
+def count_status_documents(collection):
+    """Count the number of documents in a collection with method=GET and path=/status"""
+    return collection.count_documents({"method": "GET", "path": "/status"})
+
 
 if __name__ == "__main__":
-    """
-    Database: logs, Collection: nginx
-    """
-    client = MongoClient("mongodb://127.0.0.1:27017")
-    log_collection = client.logs.nginx
+    # Connect to MongoDB
+    client = pymongo.MongoClient()
+    collection = client.logs.nginx
 
-    total_logs = log_collection.count_documents({})
-    print(f"Total logs: {total_logs}")
+    # Get stats
+    num_logs = count_documents(collection)
+    num_get = count_method_documents(collection, "GET")
+    num_post = count_method_documents(collection, "POST")
+    num_put = count_method_documents(collection, "PUT")
+    num_patch = count_method_documents(collection, "PATCH")
+    num_delete = count_method_documents(collection, "DELETE")
+    num_status = count_status_documents(collection)
 
-    http_methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
-    print("HTTP Methods:")
-    for method in http_methods:
-        count = log_collection.count_documents({"method": method})
-        print(f"\t{method}: {count}")
-
-    status_check_count = log_collection.count_documents(
-        {"method": "GET", "path": "/status"}
-    )
-    print(f"Total status checks: {status_check_count}")
+    # Print stats
+    print(f"{num_logs} logs")
+    print("Methods:")
+    print(f"\tmethod GET: {num_get}")
+    print(f"\tmethod POST: {num_post}")
+    print(f"\tmethod PUT: {num_put}")
+    print(f"\tmethod PATCH: {num_patch}")
+    print(f"\tmethod DELETE: {num_delete}")
+    print(f"{num_status} status check")
+    
